@@ -190,7 +190,7 @@ async function scanReceipt() {
     const totalLines = lines.filter(x =>
       /(totale|total|da pagare|importo|amount due)/i.test(x)
     );
-    const pool = [...totalLines].reverse().concat([...lines].reverse());
+    const pool = [...totalLines].reverse();
 
     for (const line of pool) {
       const matches = [...line.matchAll(/(\d{1,4}(?:[. ]\d{3})*[,.]\d{2}|\d{1,4})/g)];
