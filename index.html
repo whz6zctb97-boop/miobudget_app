@@ -163,7 +163,9 @@ async function scanReceipt() {
     status.textContent = 'Scatta una foto o scegli un’immagine.';
     return;
   }
-
+document.getElementById('amount').value = '';
+document.getElementById('date').value = '';
+document.getElementById('desc').value = '';
   btn.disabled = true;
   status.textContent = 'Caricamento lettore OCR…';
 
