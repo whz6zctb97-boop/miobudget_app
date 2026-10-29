@@ -237,7 +237,9 @@ async function scanReceipt() {
     const receiptText = (text + ' ' + (store || '')).toLowerCase();
     let suggestedCategory = null;
 
-    if (/farmacia|farmaceut|parafarmacia|farmacia comunale/.test(receiptText)) {
+    if (/lavanderia|lavanderie|tintoria|lavasecco|lavaggio a secco/.test(receiptText)) {
+      suggestedCategory = 'Casa';
+    } else if (/farmacia|farmaceut|parafarmacia/.test(receiptText)) {
       suggestedCategory = 'Salute';
     } else if (/benzina|gasolio|diesel|carburante|eni|q8|ip\b|tamoil|esso/.test(receiptText)) {
       suggestedCategory = 'Trasporti';
