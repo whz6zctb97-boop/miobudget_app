@@ -233,7 +233,28 @@ async function scanReceipt() {
       document.getElementById('desc').value = store.slice(0, 70);
     }
 
+    
+    const receiptText = (text + ' ' + (store || '')).toLowerCase();
+    let suggestedCategory = null;
+
+    if (/farmacia|farmaceut|parafarmacia|farmacia comunale/.test(receiptText)) {
+      suggestedCategory = 'Salute';
+    } else if (/benzina|gasolio|diesel|carburante|eni|q8|ip\b|tamoil|esso/.test(receiptText)) {
+      suggestedCategory = 'Trasporti';
+    } else if (/esselunga|conad|coop\b|carrefour|lidl|aldi|eurospin|penny|ipercoop|supermercato|alimentari|despar|pam\b/.test(receiptText)) {
+      suggestedCategory = 'Alimentari';
+    } else if (/ristorante|pizzeria|bar\b|trattoria|cinema/.test(receiptText)) {
+      suggestedCategory = 'Svago';
+    } else if (/zara|h&m|primark|decathlon|negozio di abbigliamento/.test(receiptText)) {
+      suggestedCategory = 'Shopping';
+    }
+
     setType('uscita');
+
+    if (suggestedCategory) {
+      document.getElementById('category').value = suggestedCategory;
+    }
+
     showPage('aggiungi');
 
     status.textContent = amount !== null
