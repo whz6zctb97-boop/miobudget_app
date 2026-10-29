@@ -32,7 +32,15 @@
 <section class="page" id="budget"><div class="sectionhead"><h2>Budget mensili</h2></div><div class="card"><p style="font-size:13px;color:var(--muted);margin-top:0">Imposta un limite per ogni categoria. Le spese registrate verranno conteggiate automaticamente.</p><div id="budgetList"></div><button class="primary" onclick="saveBudgets()">Salva budget</button></div><div class="tip"><strong>💡 Come usarli</strong>Il budget è un limite indicativo, non un obbligo. Parti da importi realistici e aggiustali nel tempo.</div></section>
 <section class="page" id="statistiche"><div class="sectionhead"><h2>Le tue statistiche</h2></div><div class="card"><div style="color:var(--muted);font-size:12px">Risultato del mese</div><div class="bigstat" id="statBalance">€ 0,00</div><div class="stats" style="margin-top:14px"><div class="stat" style="background:#e1fbf2;color:var(--ink)"><small>Entrate</small><strong id="statIncome">€ 0,00</strong></div><div class="stat" style="background:#ffe8ee;color:var(--ink)"><small>Uscite</small><strong id="statExpense">€ 0,00</strong></div></div></div>
 <div class="sectionhead"><h2>Grafici del mese</h2></div><div class="chartgrid"><div class="card"><h3 class="charttitle">Entrate e uscite</h3><div id="incomeExpenseChart"></div><div class="legend"><span><i class="dot" style="background:#31c6a3"></i>Entrate</span><span><i class="dot" style="background:#ff7aa2"></i>Uscite</span></div></div><div class="card"><h3 class="charttitle">Dove spendi</h3><div id="categoryDonut"></div></div></div>
-<div class="sectionhead"><h2>Spese per categoria</h2></div><div class="card" id="categoryStats"></div><div class="sectionhead"><h2>Risparmio del mese</h2></div><div class="card"><div class="bigstat" id="savingRate">0%</div><div class="smallnote">Percentuale delle entrate rimasta dopo le uscite del mese. Se le entrate sono zero, il dato non è disponibile.</div></div></section>
+<div class="sectionhead"><h2>Spese per categoria</h2></div><div class="card" id="categoryStats"></div><div class="sectionhead">
+  <h2>Storico mensile</h2>
+</div>
+<div class="card">
+  <p style="font-size:13px;color:var(--muted);margin-top:0">
+    Confronta entrate, uscite e saldo degli ultimi sei mesi.
+  </p>
+  <div id="monthlyHistory"></div>
+</div><div class="sectionhead"><h2>Risparmio del mese</h2></div><div class="card"><div class="bigstat" id="savingRate">0%</div><div class="smallnote">Percentuale delle entrate rimasta dopo le uscite del mese. Se le entrate sono zero, il dato non è disponibile.</div></div></section>
 <section class="page" id="backup"><div class="sectionhead"><h2>Dati e backup</h2></div><div class="card"><h3 style="margin-top:0">Esporta i tuoi dati</h3><p style="font-size:13px;color:var(--muted);line-height:1.5">Scarica un backup JSON con movimenti e budget. Conservalo in File o iCloud Drive.</p><button class="primary" onclick="exportData()">Scarica backup</button><div style="height:1px;background:var(--line);margin:20px 0"></div><h3>Ripristina un backup</h3><p style="font-size:13px;color:var(--muted);line-height:1.5">Il ripristino sostituirà i dati attuali e poi tenterà di sincronizzare il risultato.</p><input id="restoreFile" type="file" accept="application/json,.json" style="width:100%;font-size:13px"><button class="primary" onclick="importData()">Ripristina dati</button></div><div class="sectionhead"><h2>Privacy e sincronizzazione</h2></div><div class="card"><p style="font-size:13px;line-height:1.5;color:var(--muted)">I dati restano salvati anche nel browser di questo dispositivo. Dopo l'accesso, una copia di movimenti e budget viene salvata nella tabella privata miobudget_backups di Supabase. L'app usa solo la chiave pubblica.</p><button class="danger" onclick="clearData()">Svuota dati locali e backup online</button><p class="smallnote">Questa operazione sostituisce il backup online con dati vuoti. Esporta un backup prima di procedere.</p></div></section>
 </main></div><nav class="nav"><div class="navinner"><button class="active" data-page="home" onclick="showPage('home')"><span>⌂</span>Home</button><button data-page="movimenti" onclick="showPage('movimenti')"><span>⇄</span>Movimenti</button><button data-page="aggiungi" onclick="openForm('uscita')"><span>＋</span>Aggiungi</button><button data-page="statistiche" onclick="showPage('statistiche')"><span>▥</span>Statistiche</button><button data-page="backup" onclick="showPage('backup')"><span>↧</span>Backup</button></div></nav></div>
 <div class="toast" id="toast"></div>
@@ -75,7 +83,56 @@ function totals(){const ts=currentTx();return {in:ts.filter(t=>t.type==='entrata
 function iconFor(c){return ({Casa:'🏠',Alimentari:'🛒',Trasporti:'🚆',Svago:'🎉',Salute:'💊',Shopping:'🛍️',Stipendio:'💼',Extra:'✨',Altro:'📌'})[c]||'📌'}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function txHTML(t){return `<div class="tx"><div class="txicon">${iconFor(t.category)}</div><div class="txmain"><strong>${esc(t.desc)}</strong><small>${esc(t.category)} · ${t.date?new Date(t.date+'T12:00:00').toLocaleDateString('it-IT'):''}${t.note?' · '+esc(t.note):''}</small></div><div class="amount ${t.type==='entrata'?'plus':'minus'}">${t.type==='entrata'?'+':'−'}${euro(t.amount)}</div><button title="Elimina movimento" aria-label="Elimina movimento" onclick="deleteTx('${esc(t.id)}')" style="background:transparent;color:#aaa;font-size:18px;padding:4px">×</button></div>`}
-function render(){const t=totals(),bal=t.in-t.out;document.getElementById('balance').textContent=euro(bal);document.getElementById('incomeTotal').textContent=euro(t.in);document.getElementById('expenseTotal').textContent=euro(t.out);document.getElementById('statBalance').textContent=euro(bal);document.getElementById('statIncome').textContent=euro(t.in);document.getElementById('statExpense').textContent=euro(t.out);document.getElementById('savingRate').textContent=t.in?Math.round((bal/t.in)*100)+'%':'—';const recent=[...currentTx()].sort((a,b)=>b.date.localeCompare(a.date)||(Number(b.created)||0)-(Number(a.created)||0)).slice(0,4);document.getElementById('recentTx').innerHTML=recent.length?recent.map(txHTML).join(''):'<div class="empty">Ancora nessun movimento questo mese.<br>Inizia aggiungendo la tua prima entrata o uscita.</div>';const all=[...data.transactions].sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(Number(b.created)||0)-(Number(a.created)||0)).filter(x=>currentFilter==='tutti'||x.type===currentFilter);document.getElementById('allTx').innerHTML=all.length?all.map(txHTML).join(''):'<div class="empty">Nessun movimento da mostrare.</div>';renderBudgets();renderStats()}
+function render(){const t=totals(),bal=t.in-t.out;document.getElementById('balance').textContent=euro(bal);document.getElementById('incomeTotal').textContent=euro(t.in);document.getElementById('expenseTotal').textContent=euro(t.out);document.getElementById('statBalance').textContent=euro(bal);document.getElementById('statIncome').textContent=euro(t.in);document.getElementById('statExpense').textContent=euro(t.out);document.getElementById('savingRate').textContent=t.in?Math.round((bal/t.in)*100)+'%':'—';const recent=[...currentTx()].sort((a,b)=>b.date.localeCompare(a.date)||(Number(b.created)||0)-(Number(a.created)||0)).slice(0,4);document.getElementById('recentTx').innerHTML=recent.length?recent.map(txHTML).join(''):'<div class="empty">Ancora nessun movimento questo mese.<br>Inizia aggiungendo la tua prima entrata o uscita.</div>';const all=[...data.transactions].sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(Number(b.created)||0)-(Number(a.created)||0)).filter(x=>currentFilter==='tutti'||x.type===currentFilter);document.getElementById('allTx').innerHTML=all.length?all.map(txHTML).join(''):'<div class="empty">Nessun movimento da mostrare.</div>';renderBudgets();renderStats();renderMonthlyHistory() }
+function renderMonthlyHistory(){
+  const target=document.getElementById('monthlyHistory');
+  if(!target)return;
+
+  const months=[];
+  const now=new Date();
+
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    const label=d.toLocaleDateString('it-IT',{month:'long',year:'numeric'});
+    const tx=data.transactions.filter(t=>t.date&&t.date.slice(0,7)===key);
+    const income=tx.filter(t=>t.type==='entrata').reduce((s,t)=>s+Number(t.amount||0),0);
+    const expense=tx.filter(t=>t.type==='uscita').reduce((s,t)=>s+Number(t.amount||0),0);
+    months.push({key,label,income,expense,balance:income-expense});
+  }
+
+  const maxExpense=Math.max(1,...months.map(m=>m.expense));
+
+  target.innerHTML=months.map((m,i)=>{
+    const prev=months[i-1];
+    let comparison='Primo mese del confronto';
+    if(prev){
+      if(prev.expense===0&&m.expense===0)comparison='Spese invariate';
+      else if(prev.expense===0)comparison='Spese iniziate questo mese';
+      else{
+        const pct=Math.round((m.expense-prev.expense)/prev.expense*100);
+        comparison=pct>0?'Spese aumentate del '+pct+'%':
+          pct<0?'Spese diminuite del '+Math.abs(pct)+'%':
+          'Spese invariate';
+      }
+    }
+
+    return `<div style="padding:14px 0;border-bottom:1px solid var(--line)">
+      <strong style="text-transform:capitalize">${esc(m.label)}</strong>
+      <div style="display:flex;justify-content:space-between;gap:8px;margin-top:10px;font-size:13px">
+        <span style="color:#159b7c">Entrate: ${euro(m.income)}</span>
+        <span style="color:#e45e83">Uscite: ${euro(m.expense)}</span>
+      </div>
+      <div style="height:7px;background:var(--line);border-radius:8px;margin-top:9px;overflow:hidden">
+        <div style="height:100%;width:${m.expense/maxExpense*100}%;background:#ff7aa2;border-radius:8px"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--muted)">
+        <span>Saldo: ${euro(m.balance)}</span>
+        <span>${comparison}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
 function renderBudgets(){let html='';cats.forEach(c=>{const used=currentTx().filter(t=>t.type==='uscita'&&t.category===c).reduce((s,t)=>s+Number(t.amount||0),0),limit=Number(data.budgets[c]||0),pct=limit?Math.min(100,used/limit*100):0;html+=`<div class="budgetrow"><strong>${iconFor(c)} ${c}</strong><span>${euro(used)} / ${euro(limit)}</span></div><div class="track"><div class="fill ${pct>=85?'warn':''}" style="width:${pct}%"></div></div>`});document.getElementById('homeBudgets').innerHTML=html;document.getElementById('budgetList').innerHTML=cats.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line)"><label style="font-size:14px;font-weight:700">${iconFor(c)} ${c}</label><input class="budgetinput" type="number" min="0" step="10" data-cat="${c}" value="${Number(data.budgets[c]||0)}" aria-label="Budget ${c}"></div>`).join('')}
 function renderStats(){const spends={};currentTx().filter(t=>t.type==='uscita').forEach(t=>spends[t.category]=(spends[t.category]||0)+Number(t.amount||0));const entries=Object.entries(spends).sort((a,b)=>b[1]-a[1]);document.getElementById('categoryStats').innerHTML=entries.length?entries.map(([c,v])=>`<div class="barline"><div class="barlabel">${iconFor(c)} ${esc(c)}</div><div class="barouter"><div class="barinner" style="width:${v/Math.max(...entries.map(x=>x[1]))*100}%"></div></div><div class="barvalue">${euro(v)}</div></div>`).join(''):'<div class="empty">Le spese per categoria appariranno qui.</div>';document.getElementById('tipText').textContent=entries.length?`La categoria con più spese questo mese è ${entries[0][0]} (${euro(entries[0][1])}). Controlla se puoi ridurre anche solo una piccola parte.`:'Registra le tue spese per capire dove vanno i tuoi soldi. Anche pochi minuti a settimana fanno la differenza.';renderIncomeExpenseChart();renderDonut(entries)}
 function renderIncomeExpenseChart(){const {in:income,out:expense}=totals(),max=Math.max(income,expense,1);const target=document.getElementById('incomeExpenseChart');target.innerHTML=`<div class="comparebar"><div class="comparelabel"><span>Entrate</span><strong>${euro(income)}</strong></div><div class="comparetrack"><div class="comparefill" style="width:${income/max*100}%;background:#31c6a3"></div></div></div><div class="comparebar"><div class="comparelabel"><span>Uscite</span><strong>${euro(expense)}</strong></div><div class="comparetrack"><div class="comparefill" style="width:${expense/max*100}%;background:#ff7aa2"></div></div></div>${income===0&&expense===0?'<div class="chartempty">Aggiungi un movimento per vedere il grafico.</div>':''}`}
