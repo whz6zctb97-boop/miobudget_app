@@ -227,15 +227,7 @@ alert('Testo letto dallo scontrino:\n\n' + text.slice(0, 2500));
       }
     }
 
-    const store = lines.find(x =>
-      /[A-Za-zÀ-ÿ]{3}/.test(x) &&
-      !/(scontrino|documento commerciale|partita iva|iva|totale|subtotale|contanti|bancomat|pagamento|resto|data|ora)/i.test(x) &&
-      x.length < 65
-    );
-
-    if (store && !document.getElementById('desc').value.trim()) {
-      document.getElementById('desc').value = store.slice(0, 70);
-    }
+    const store = null;
 
     
     const receiptText = (text + ' ' + (store || '')).toLowerCase();
