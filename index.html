@@ -187,7 +187,7 @@ document.getElementById('desc').value = '';
     const result = await Tesseract.recognize(file, 'ita+eng');
     const text = result.data.text || '';
     console.log('TESTO OCR:', text);
-alert('Testo letto dallo scontrino:\n\n' + text.slice(0, 2500));
+
     const lines = text.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
 
     let amount = null;
