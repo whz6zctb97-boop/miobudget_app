@@ -28,9 +28,11 @@
 <div class="sectionhead"><h2>Budget del mese</h2><button class="link" onclick="showPage('budget')">Gestisci →</button></div><div class="card" id="homeBudgets"></div>
 <div class="sectionhead"><h2>Movimenti recenti</h2><button class="link" onclick="showPage('movimenti')">Tutti →</button></div><div class="card" id="recentTx"></div><div class="tip"><strong>✨ Un piccolo passo conta</strong><span id="tipText">Registra le tue spese per capire dove vanno i tuoi soldi.</span></div></section>
 <section class="page" id="movimenti"><div class="sectionhead"><h2>Tutti i movimenti</h2><button class="secondary" onclick="openForm('uscita')">＋ Nuovo</button></div><div class="tabs"><button class="active" onclick="filterTx('tutti',this)">Tutti</button><button onclick="filterTx('entrata',this)">Entrate</button><button onclick="filterTx('uscita',this)">Uscite</button></div><div class="card" id="allTx"></div></section>
-<section class="page" id="aggiungi"><div class="sectionhead"><h2>Nuovo movimento</h2></div><div class="card"><div class="tabs"><button id="tabIncome" onclick="setType('entrata')">＋ Entrata</button><button id="tabExpense" class="active" onclick="setType('uscita')">− Uscita</button></div><form id="txForm"><div class="formgrid"><label class="field full">Descrizione<input id="desc" placeholder="Es. Spesa al supermercato" required maxlength="70"></label><label class="field">Importo (€)<input id="amount" type="number" min="0.01" step="0.01" placeholder="0,00" required></label><label class="field">Data<input id="date" type="date" required></label><label class="field">Categoria<select id="category"><option>Casa</option><option>Alimentari</option><option>Trasporti</option><option>Svago</option><option>Salute</option><option>Shopping</option><option>Stipendio</option><option>Extra</option><option>Altro</option></select></label><label class="field">Metodo<select id="method"><option>Contanti</option><option>Carta</option><option>Bonifico</option><option>Altro</option></select></label><label class="field full">Nota (facoltativa)<input id="note" placeholder="Aggiungi un dettaglio"></label></div><button class="primary" type="submit">Salva movimento</button></form></div><p class="smallnote">I dati vengono conservati sul dispositivo e sincronizzati con l'account quando la connessione è disponibile. Mantieni anche un backup.</p></section>
+<section class="page" id="aggiungi"><div class="sectionhead"><h2>Nuovo movimento</h2></div><div class="card"><div class="tabs"><button id="tabIncome" onclick="setType('entrata')">＋ Entrata</button><button id="tabExpense" class="active" onclick="setType('uscita')">− Uscita</button></div>
+<form id="txForm"><div class="receiptbox" style="background:#f6f4ff;border:1px dashed #b8afff;border-radius:14px;padding:14px;margin-bottom:16px"><strong>📷 Leggi uno scontrino</strong><p class="smallnote" style="margin:6px 0 10px">Scatta una foto o scegli un’immagine. MioBudget proverà a riconoscere totale, data e negozio; controlla tutto prima di salvare.</p><input id="receiptImage" type="file" accept="image/*" capture="environment" style="width:100%;font-size:13px"><button id="scanReceiptBtn" class="secondary" type="button" style="margin-top:10px;width:100%">Analizza scontrino</button><p id="receiptStatus" class="smallnote" aria-live="polite" style="margin-bottom:0"></p></div><div class="formgrid">
+<label class="field full">Descrizione<input id="desc" placeholder="Es. Spesa al supermercato" required maxlength="70"></label><label class="field">Importo (€)<input id="amount" type="number" min="0.01" step="0.01" placeholder="0,00" required></label><label class="field">Data<input id="date" type="date" required></label><label class="field">Categoria<select id="category"><option>Casa</option><option>Alimentari</option><option>Trasporti</option><option>Svago</option><option>Salute</option><option>Shopping</option><option>Stipendio</option><option>Extra</option><option>Altro</option></select></label><label class="field">Metodo<select id="method"><option>Contanti</option><option>Carta</option><option>Bonifico</option><option>Altro</option></select></label><label class="field full">Nota (facoltativa)<input id="note" placeholder="Aggiungi un dettaglio"></label></div><button class="primary" type="submit">Salva movimento</button></form></div><p class="smallnote">I dati vengono conservati sul dispositivo e sincronizzati con l'account quando la connessione è disponibile. Mantieni anche un backup.</p></section>
 <section class="page" id="budget"><div class="sectionhead"><h2>Budget mensili</h2></div><div class="card"><p style="font-size:13px;color:var(--muted);margin-top:0">Imposta un limite per ogni categoria. Le spese registrate verranno conteggiate automaticamente.</p><div id="budgetList"></div><button class="primary" onclick="saveBudgets()">Salva budget</button></div><div class="tip"><strong>💡 Come usarli</strong>Il budget è un limite indicativo, non un obbligo. Parti da importi realistici e aggiustali nel tempo.</div></section>
-<section class="page" id="statistiche"><div class="sectionhead"><h2>Le tue statistiche</h2></div><div class="card"><div style="color:var(--muted);font-size:12px">Risultato del mese</div><div class="bigstat" id="statBalance">€ 0,00</div><div class="stats" style="margin-top:14px"><div class="stat" style="background:#e1fbf2;color:var(--ink)"><small>Entrate</small><strong id="statIncome">€ 0,00</strong></div><div class="stat" style="background:#ffe8ee;color:var(--ink)"><small>Uscite</small><strong id="statExpense">€ 0,00</strong></div></div></div>
+<section class="page" id="statistichemm"><div class="sectionhead"><h2>Le tue statistiche</h2></div><div class="card"><div style="color:var(--muted);font-size:12px">Risultato del mese</div><div class="bigstat" id="statBalance">€ 0,00</div><div class="stats" style="margin-top:14px"><div class="stat" style="background:#e1fbf2;color:var(--ink)"><small>Entrate</small><strong id="statIncome">€ 0,00</strong></div><div class="stat" style="background:#ffe8ee;color:var(--ink)"><small>Uscite</small><strong id="statExpense">€ 0,00</strong></div></div></div>
 <div class="sectionhead"><h2>Grafici del mese</h2></div><div class="chartgrid"><div class="card"><h3 class="charttitle">Entrate e uscite</h3><div id="incomeExpenseChart"></div><div class="legend"><span><i class="dot" style="background:#31c6a3"></i>Entrate</span><span><i class="dot" style="background:#ff7aa2"></i>Uscite</span></div></div><div class="card"><h3 class="charttitle">Dove spendi</h3><div id="categoryDonut"></div></div></div>
 <div class="sectionhead"><h2>Spese per categoria</h2></div><div class="card" id="categoryStats"></div><div class="sectionhead">
   <h2>Storico mensile</h2>
@@ -148,6 +150,104 @@ function exportData(){const blob=new Blob([JSON.stringify({...data,exportedAt:ne
 function importData(){const f=document.getElementById('restoreFile').files[0];if(!f){notify('Scegli prima un file JSON');return}const reader=new FileReader();reader.onload=()=>{try{const x=JSON.parse(reader.result);if(!validData(x)||!x.transactions.every(t=>t&&['entrata','uscita'].includes(t.type)&&Number.isFinite(Number(t.amount))))throw new Error('invalid');if(!confirm('Il ripristino sostituirà tutti i dati attuali. Continuare?'))return;data={transactions:x.transactions,budgets:{...defaultData().budgets,...x.budgets}};persist();notify('Backup ripristinato')}catch(e){notify('File non valido o backup incompatibile')}};reader.readAsText(f)}
 function clearData(){if(!confirm('Questa operazione svuota i movimenti e ripristina i budget predefiniti sul dispositivo e nel backup online. Hai già esportato un backup?'))return;if(!confirm('Confermi di voler svuotare i dati? Questa operazione non è annullabile senza un backup.'))return;data=defaultData();persist();notify('Dati svuotati sul dispositivo; sincronizzazione online in corso')}
 let toastTimer;function notify(s){const t=document.getElementById('toast');t.textContent=s;t.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.display='none',2800)}
+
+ // Lettura scontrini direttamente nel browser
+let tesseractLoader = null;
+
+async function scanReceipt() {
+  const file = document.getElementById('receiptImage').files[0];
+  const status = document.getElementById('receiptStatus');
+  const btn = document.getElementById('scanReceiptBtn');
+
+  if (!file) {
+    status.textContent = 'Scatta una foto o scegli un’immagine.';
+    return;
+  }
+
+  btn.disabled = true;
+  status.textContent = 'Caricamento lettore OCR…';
+
+  try {
+    if (!window.Tesseract) {
+      if (!tesseractLoader) {
+        tesseractLoader = new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+          script.onload = resolve;
+          script.onerror = () => reject(new Error('Controlla la connessione Internet.'));
+          document.head.appendChild(script);
+        });
+      }
+      await tesseractLoader;
+    }
+
+    status.textContent = 'Sto leggendo lo scontrino… attendi.';
+    const result = await Tesseract.recognize(file, 'ita+eng');
+    const text = result.data.text || '';
+    const lines = text.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+
+    let amount = null;
+    const totalLines = lines.filter(x =>
+      /(totale|total|da pagare|importo|amount due)/i.test(x)
+    );
+    const pool = [...totalLines].reverse().concat([...lines].reverse());
+
+    for (const line of pool) {
+      const matches = [...line.matchAll(/(\d{1,4}(?:[. ]\d{3})*[,.]\d{2}|\d{1,4})/g)];
+      if (matches.length) {
+        const raw = matches[matches.length - 1][1]
+          .replace(/[. ](?=\d{3}(?:[,.]|$))/g, '')
+          .replace(',', '.');
+        const n = Number(raw);
+        if (Number.isFinite(n) && n > 0 && n < 100000) {
+          amount = n;
+          break;
+        }
+      }
+    }
+
+    if (amount !== null) {
+      document.getElementById('amount').value = amount.toFixed(2);
+    }
+
+    const dm = text.match(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})\b/);
+    if (dm) {
+      let y = Number(dm[3]);
+      if (y < 100) y += 2000;
+      const d = new Date(y, Number(dm[2]) - 1, Number(dm[1]));
+      if (d.getFullYear() === y && d.getMonth() === Number(dm[2]) - 1 &&
+          d.getDate() === Number(dm[1])) {
+        document.getElementById('date').value =
+          y + '-' + String(d.getMonth() + 1).padStart(2, '0') +
+          '-' + String(d.getDate()).padStart(2, '0');
+      }
+    }
+
+    const store = lines.find(x =>
+      /[A-Za-zÀ-ÿ]{3}/.test(x) &&
+      !/(scontrino|documento commerciale|partita iva|iva|totale|subtotale|contanti|bancomat|pagamento|resto|data|ora)/i.test(x) &&
+      x.length < 65
+    );
+
+    if (store && !document.getElementById('desc').value.trim()) {
+      document.getElementById('desc').value = store.slice(0, 70);
+    }
+
+    setType('uscita');
+    showPage('aggiungi');
+
+    status.textContent = amount !== null
+      ? 'Lettura terminata. Controlla i campi: il movimento NON è ancora salvato.'
+      : 'Non ho individuato con certezza il totale. Controlla e inserisci l’importo manualmente.';
+  } catch (err) {
+    status.textContent = 'Lettura non riuscita. Puoi compilare i campi manualmente.';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('scanReceiptBtn').addEventListener('click', scanReceipt);
+
 document.getElementById('authForm').addEventListener('submit',e=>{e.preventDefault();signIn()});document.getElementById('signupBtn').addEventListener('click',signUp);document.getElementById('resetBtn').addEventListener('click',resetPassword);document.getElementById('logoutBtn').addEventListener('click',logout);document.getElementById('syncNowBtn').addEventListener('click',()=>uploadRemote());
 load();
 if(!initSupabase()){setAuthMessage('Prima di accedere, apri index.html e sostituisci INSERISCI_QUI_LA_TUA_SB_PUBLISHABLE_KEY con la chiave pubblica sb_publishable_ del tuo progetto Supabase.');}
