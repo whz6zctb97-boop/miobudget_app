@@ -25,8 +25,33 @@
 <main>
 <section class="page active" id="home"><div class="hero"><div class="eyebrow">Saldo del mese</div><div class="balance" id="balance">€ 0,00</div><div class="stats"><div class="stat"><small>↗ Entrate</small><strong id="incomeTotal">€ 0,00</strong></div><div class="stat"><small>↘ Uscite</small><strong id="expenseTotal">€ 0,00</strong></div></div></div>
 <div class="quick"><button onclick="openForm('entrata')"><div class="qicon income">＋</div>Aggiungi entrata</button><button onclick="openForm('uscita')"><div class="qicon expense">−</div>Aggiungi uscita</button><button onclick="showPage('budget')"><div class="qicon budgeticon">◎</div>I miei budget</button></div>
-<div class="sectionhead"><h2>Budget del mese</h2><button class="link" onclick="showPage('budget')">Gestisci →</button></div><div class="card" id="homeBudgets"></div>
-<div class="sectionhead"><h2>Movimenti recenti</h2><button class="link" onclick="showPage('movimenti')">Tutti →</button></div><div class="card" id="recentTx"></div><div class="tip"><strong>✨ Un piccolo passo conta</strong><span id="tipText">Registra le tue spese per capire dove vanno i tuoi soldi.</span></div></section>
+<div class="sectionhead"><h2>Il tuo risparmio</h2></div>
+<div class="card">
+  <div class="bigstat" id="homeSaving">€ 0,00</div>
+  <div class="smallnote" id="homeSavingRate">Risparmio sulle entrate del mese</div>
+</div>
+
+<div class="sectionhead"><h2>Confronto mensile</h2></div>
+<div class="card" id="homeComparison">
+  <div class="empty">Dati in caricamento...</div>
+</div>
+
+<div class="sectionhead"><h2>Attenzione ai budget</h2></div>
+<div class="card" id="homeAlerts">
+  <div class="empty">Nessun avviso.</div>
+</div>
+
+<div class="sectionhead"><h2>Budget del mese</h2><button class="link" onclick="showPage('budget')">Gestisci →</button></div>
+<div class="card" id="homeBudgets"></div>
+
+<div class="sectionhead"><h2>Movimenti recenti</h2><button class="link" onclick="showPage('movimenti')">Tutti →</button></div>
+<div class="card" id="recentTx"></div>
+
+<div class="tip">
+  <strong>✨ Un piccolo passo conta</strong>
+  <span id="tipText">Registra le tue spese per capire dove vanno i tuoi soldi.</span>
+</div>
+</section>
 <section class="page" id="movimenti"><div class="sectionhead"><h2>Tutti i movimenti</h2><button class="secondary" onclick="openForm('uscita')">＋ Nuovo</button></div><div class="tabs"><button class="active" onclick="filterTx('tutti',this)">Tutti</button><button onclick="filterTx('entrata',this)">Entrate</button><button onclick="filterTx('uscita',this)">Uscite</button></div><div class="card" id="allTx"></div></section>
 <section class="page" id="aggiungi"><div class="sectionhead"><h2>Nuovo movimento</h2></div><div class="card"><div class="tabs"><button id="tabIncome" onclick="setType('entrata')">＋ Entrata</button><button id="tabExpense" class="active" onclick="setType('uscita')">− Uscita</button></div>
 <form id="txForm"><div class="receiptbox" style="background:#f6f4ff;border:1px dashed #b8afff;border-radius:14px;padding:14px;margin-bottom:16px"><strong>📷 Leggi uno scontrino</strong><p class="smallnote" style="margin:6px 0 10px">Scatta una foto o scegli un’immagine. MioBudget proverà a riconoscere totale, data e negozio; controlla tutto prima di salvare.</p><input id="receiptImage" type="file" accept="image/*" capture="environment" style="width:100%;font-size:13px"><button id="scanReceiptBtn" class="secondary" type="button" style="margin-top:10px;width:100%">Analizza scontrino</button><p id="receiptStatus" class="smallnote" aria-live="polite" style="margin-bottom:0"></p></div><div class="formgrid">
@@ -85,9 +110,81 @@ function totals(){const ts=currentTx();return {in:ts.filter(t=>t.type==='entrata
 function iconFor(c){return ({Casa:'🏠',Alimentari:'🛒',Trasporti:'🚆',Svago:'🎉',Salute:'💊',Shopping:'🛍️',Stipendio:'💼',Extra:'✨',Altro:'📌'})[c]||'📌'}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function txHTML(t){return `<div class="tx"><div class="txicon">${iconFor(t.category)}</div><div class="txmain"><strong>${esc(t.desc)}</strong><small>${esc(t.category)} · ${t.date?new Date(t.date+'T12:00:00').toLocaleDateString('it-IT'):''}${t.note?' · '+esc(t.note):''}</small></div><div class="amount ${t.type==='entrata'?'plus':'minus'}">${t.type==='entrata'?'+':'−'}${euro(t.amount)}</div><button title="Elimina movimento" aria-label="Elimina movimento" onclick="deleteTx('${esc(t.id)}')" style="background:transparent;color:#aaa;font-size:18px;padding:4px">×</button></div>`}
-function render(){const t=totals(),bal=t.in-t.out;document.getElementById('balance').textContent=euro(bal);document.getElementById('incomeTotal').textContent=euro(t.in);document.getElementById('expenseTotal').textContent=euro(t.out);document.getElementById('statBalance').textContent=euro(bal);document.getElementById('statIncome').textContent=euro(t.in);document.getElementById('statExpense').textContent=euro(t.out);document.getElementById('savingRate').textContent=t.in?Math.round((bal/t.in)*100)+'%':'—';const recent=[...currentTx()].sort((a,b)=>b.date.localeCompare(a.date)||(Number(b.created)||0)-(Number(a.created)||0)).slice(0,4);document.getElementById('recentTx').innerHTML=recent.length?recent.map(txHTML).join(''):'<div class="empty">Ancora nessun movimento questo mese.<br>Inizia aggiungendo la tua prima entrata o uscita.</div>';const all=[...data.transactions].sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(Number(b.created)||0)-(Number(a.created)||0)).filter(x=>currentFilter==='tutti'||x.type===currentFilter);document.getElementById('allTx').innerHTML=all.length?all.map(txHTML).join(''):'<div class="empty">Nessun movimento da mostrare.</div>';renderBudgets();renderStats();renderMonthlyHistory() } 
-function renderMonthlyHistory(){
-  const target=document.getElementById('monthlyHistory');
+function render(){
+  const t=totals();
+  const bal=t.in-t.out;
+
+  document.getElementById('balance').textContent=euro(bal);
+  document.getElementById('incomeTotal').textContent=euro(t.in);
+  document.getElementById('expenseTotal').textContent=euro(t.out);
+
+  document.getElementById('statBalance').textContent=euro(bal);
+  document.getElementById('statIncome').textContent=euro(t.in);
+  document.getElementById('statExpense').textContent=euro(t.out);
+  document.getElementById('savingRate').textContent=t.in?Math.round((bal/t.in)*100)+'%':'—';
+
+  document.getElementById('homeSaving').textContent=euro(bal);
+  document.getElementById('homeSavingRate').textContent=
+    t.in ? 'Hai mantenuto il '+Math.round((bal/t.in)*100)+'% delle entrate.'
+         : 'Registra un’entrata per calcolare il risparmio.';
+
+  const now=new Date();
+  const previous=new Date(now.getFullYear(),now.getMonth()-1,1);
+  const previousKey=previous.getFullYear()+'-'+String(previous.getMonth()+1).padStart(2,'0');
+
+  const previousTx=data.transactions.filter(x=>x.date&&x.date.slice(0,7)===previousKey);
+  const previousOut=previousTx.filter(x=>x.type==='uscita').reduce((s,x)=>s+Number(x.amount||0),0);
+  const previousIn=previousTx.filter(x=>x.type==='entrata').reduce((s,x)=>s+Number(x.amount||0),0);
+
+  const comparison=document.getElementById('homeComparison');
+
+  if(previousTx.length){
+    const diff=t.out-previousOut;
+    const message=diff>0?'Hai speso di più':diff<0?'Hai speso di meno':'Hai speso quanto il mese scorso';
+    comparison.innerHTML=`
+      <div class="budgetrow"><strong>Uscite mese scorso</strong><span>${euro(previousOut)}</span></div>
+      <div class="budgetrow"><strong>Uscite questo mese</strong><span>${euro(t.out)}</span></div>
+      <p style="font-size:13px;color:var(--purple);font-weight:750;margin-bottom:0">${message}: ${euro(Math.abs(diff))}</p>
+      <p class="smallnote">Entrate mese scorso: ${euro(previousIn)}</p>`;
+  }else{
+    comparison.innerHTML='<div class="empty">Non ci sono ancora movimenti del mese precedente per fare un confronto.</div>';
+  }
+
+  const alerts=[];
+  cats.forEach(c=>{
+    const limit=Number(data.budgets[c]||0);
+    const used=currentTx().filter(x=>x.type==='uscita'&&x.category===c)
+      .reduce((s,x)=>s+Number(x.amount||0),0);
+
+    if(limit>0&&used>=limit){
+      alerts.push(`<div class="budgetrow"><strong>🔴 ${c}</strong><span>Superato di ${euro(used-limit)}</span></div>`);
+    }else if(limit>0&&used>=limit*0.8){
+      alerts.push(`<div class="budgetrow"><strong>🟡 ${c}</strong><span>Hai utilizzato il ${Math.round(used/limit*100)}%</span></div>`);
+    }
+  });
+
+  document.getElementById('homeAlerts').innerHTML=alerts.length
+    ?alerts.join('')
+    :'<div class="empty">Tutto tranquillo! Nessun budget vicino al limite.</div>';
+
+  const recent=[...currentTx()].sort((a,b)=>b.date.localeCompare(a.date)||(Number(b.created)||0)-(Number(a.created)||0)).slice(0,4);
+
+  document.getElementById('recentTx').innerHTML=recent.length
+    ?recent.map(txHTML).join('')
+    :'<div class="empty">Ancora nessun movimento questo mese.<br>Inizia aggiungendo la tua prima entrata o uscita.</div>';
+
+  const all=[...data.transactions].sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(Number(b.created)||0)-(Number(a.created)||0)).filter(x=>currentFilter==='tutti'||x.type===currentFilter);
+
+  document.getElementById('allTx').innerHTML=all.length
+    ?all.map(txHTML).join('')
+    :'<div class="empty">Nessun movimento da mostrare.</div>';
+
+  renderBudgets();
+  renderStats();
+  renderMonthlyHistory();
+}
+  function renderMonthlyHistory(){
+    const target=document.getElementById('monthlyHistory');
   if(!target)return;
 
   const months=[];
