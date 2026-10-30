@@ -183,7 +183,8 @@ function render(){
   renderStats();
   renderMonthlyHistory();
 }
-  const target=document.getElementById('monthlyHistory');
+  function renderMonthlyHistory(){
+    const target=document.getElementById('monthlyHistory');
   if(!target)return;
 
   const months=[];
