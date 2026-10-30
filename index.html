@@ -195,107 +195,73 @@ document.getElementById('desc').value = '';
     
     let amount = null;
 
-    const totalLines = lines.filter(x =>
-      /(totale|total|da pagare|importo|amount due)/i.test(x)
-    );
-    const pool = [...totalLines].reverse();
+const parseMoney = raw => {
+  let value = raw.replace(/[€\s]/g, '');
 
-    const parseMoney = raw => {
-      let value = raw.replace(/[€\s]/g, '');
-
-      if (value.includes(',') && value.includes('.')) {
-        if (value.lastIndexOf(',') > value.lastIndexOf('.')) {
-          value = value.replace(/\./g, '').replace(',', '.');
-        } else {
-          value = value.replace(/,/g, '');
-        }
-      } else if (value.includes(',')) {
-        const decimals = value.split(',').pop();
-        value = decimals.length <= 2
-          ? value.replace(',', '.')
-          : value.replace(/,/g, '');
-      } else if (value.includes('.')) {
-        const decimals = value.split('.').pop();
-        if (decimals.length > 2) {
-          value = value.replace(/\./g, '');
-        }
-      }
-
-      const n = Number(value);
-      return Number.isFinite(n) && n > 0 && n < 100000
-        ? n
-        : null;
-    };
-
-    for (const line of pool) {
-      const matches = [
-        ...line.matchAll(/(\d{1,4}(?:[. ]\d{3})*[,.]\d{2}|\d{1,4})/g)
-      ];
-
-      if (matches.length) {
-        const n = parseMoney(matches[matches.length - 1][1]);
-
-        if (n !== null) {
-          amount = n;
-          break;
-        }
-      }
+  if (value.includes(',') && value.includes('.')) {
+    if (value.lastIndexOf(',') > value.lastIndexOf('.')) {
+      value = value.replace(/\./g, '').replace(',', '.');
+    } else {
+      value = value.replace(/,/g, '');
     }
-
-        }
-      } else if (value.includes(',')) {
-        const decimals = value.split(',').pop();
-        value = decimals.length <= 2
-          ? value.replace(',', '.')
-          : value.replace(/,/g, '');
-      } else if (value.includes('.')) {
-        const decimals = value.split('.').pop();
-        if (decimals.length > 2) {
-          value = value.replace(/\./g, '');
-        }
-      }
-
-      const n = Number(value);
-      return Number.isFinite(n) && n > 0 && n < 100000
-        ? n
-        : null;
-    };
-
-    const totalLines = lines.filter(line =>
-      /(totale da pagare|totale complessivo|totale|da pagare|importo dovuto|amount due)/i.test(line) &&
-      !/(subtotale|resto|contanti|bancomat|importo contante)/i.test(line)
-    );
-
-    const findAmountInLine = (line, allowInteger) => {
-      const pattern = /(?:€\s*)?(\d{1,4}(?:[. ]\d{3})*[,.]\d{1,2}|\d{1,4})(?:\s*€)?/g;
-      const matches = [...line.matchAll(pattern)];
-
-      const candidates = matches.map(match => ({
-        raw: match[1],
-        hasCurrency: /€/.test(match[0]),
-        hasDecimal: /[,.]\d{1,2}$/.test(match[1]),
-        amount: parseMoney(match[1])
-      })).filter(item => item.amount !== null);
-
-      candidates.sort((a, b) =>
-        ((b.hasCurrency ? 4 : 0) + (b.hasDecimal ? 2 : 0)) -
-        ((a.hasCurrency ? 4 : 0) + (a.hasDecimal ? 2 : 0))
-      );
-
-      const best = candidates[0];
-      if (!best) return null;
-
-      if (!best.hasCurrency && !best.hasDecimal && !allowInteger) {
-        return null;
-      }
-
-      return best.amount;
-    };
-
-    for (const line of [...totalLines].reverse()) {
-      amount = findAmountInLine(line, true);
-      if (amount !== null) break;
+  } else if (value.includes(',')) {
+    const decimals = value.split(',').pop();
+    value = decimals.length <= 2
+      ? value.replace(',', '.')
+      : value.replace(/,/g, '');
+  } else if (value.includes('.')) {
+    const decimals = value.split('.').pop();
+    if (decimals.length > 2) {
+      value = value.replace(/\./g, '');
     }
+  }
+
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 && n < 100000 ? n : null;
+};
+
+const totalLines = lines.filter(line =>
+  /(totale da pagare|totale complessivo|totale|da pagare|importo dovuto|amount due)/i.test(line) &&
+  !/(subtotale|resto|contanti|bancomat|importo contante)/i.test(line)
+);
+
+const findAmountInLine = (line, allowInteger) => {
+  const pattern = /(?:€\s*)?(\d{1,4}(?:[. ]\d{3})*[,.]\d{1,2}|\d{1,4})(?:\s*€)?/g;
+  const matches = [...line.matchAll(pattern)];
+
+  const candidates = matches.map(match => ({
+    raw: match[1],
+    hasCurrency: /€/.test(match[0]),
+    hasDecimal: /[,.]\d{1,2}$/.test(match[1]),
+    amount: parseMoney(match[1])
+  })).filter(item => item.amount !== null);
+
+  candidates.sort((a, b) =>
+    ((b.hasCurrency ? 4 : 0) + (b.hasDecimal ? 2 : 0)) -
+    ((a.hasCurrency ? 4 : 0) + (a.hasDecimal ? 2 : 0))
+  );
+
+  const best = candidates[0];
+  if (!best) return null;
+
+  if (!best.hasCurrency && !best.hasDecimal && !allowInteger) {
+    return null;
+  }
+
+  return best.amount;
+};
+
+for (const line of [...totalLines].reverse()) {
+  amount = findAmountInLine(line, true);
+  if (amount !== null) break;
+}
+
+if (amount === null) {
+  for (const line of [...lines].reverse()) {
+    amount = findAmountInLine(line, false);
+    if (amount !== null) break;
+  }
+}
 
     if (amount === null) {
       for (const line of [...lines].reverse()) {
